@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
+    "build:single": "tsc --noEmit && vite build --mode single",
     "preview": "vite preview",
     "images": "node scripts/prepare-images.mjs",
     "typecheck": "tsc --noEmit"
@@ -20,6 +21,7 @@
     "@types/three": "0.187.0",
     "sharp": "0.35.5",
     "typescript": "~5.9.3",
-    "vite": "8.3.8"
+    "vite": "8.3.8",
+    "vite-plugin-singlefile": "^2.3.4"
   }
 }

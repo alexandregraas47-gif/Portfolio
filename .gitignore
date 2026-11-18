@@ -6,3 +6,4 @@ dist/
 # retirer la ligne suivante pour les versionner.
 raw/**/*
 !raw/README.md
+dist-single/

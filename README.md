@@ -13,7 +13,12 @@ npm install
 npm run dev        # http://localhost:5173 (ajouter #debug pour voir fps / draw calls)
 npm run build      # vérifie les types puis construit dans dist/
 npm run preview    # sert dist/ en local
+npm run build:single  # tout le site dans un seul fichier : dist-single/index.html
 ```
+
+`build:single` produit un fichier HTML unique (~1 Mo) qui s'ouvre d'un double-clic, sans
+internet : une copie de secours pour une présentation en classe. Les images de `public/img`
+n'y sont pas incluses.
 
 Node 20 ou plus récent.
 
