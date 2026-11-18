@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La Tour d'Alex · Alexandre Graas, brand &amp; marketing</title>
+<meta name="description" content="Portfolio 3D d'Alexandre Graas (ICN Business School, MSc Brand &amp; Marketing Management) : prends l'ascenseur, un étage par projet.">
+<meta name="theme-color" content="#0A0E33">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:title" content="La Tour d'Alex">
+<meta property="og:description" content="Prends l'ascenseur : un étage par projet. Portfolio 3D d'Alexandre Graas, brand &amp; marketing.">
+<meta property="og:url" content="%VITE_SITE_URL%">
+<meta property="og:image" content="%VITE_SITE_URL%og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+</head>
+<body>
+<canvas id="gl" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+<div class="hud" id="hud">
+  <div class="bar" id="bar"></div>
+  <div class="top tag"><span>Alexandre Graas<span class="long"> · Portfolio 2026</span></span><span id="lab">01 / 12</span></div>
+  <nav class="dots" id="dots" aria-label="Étages"></nav>
+  <div class="lift" id="lift" aria-hidden="true"><span class="arr">▼</span><b id="liftNum">0</b><small id="liftName"></small></div>
+  <div class="t360 tag" id="t360">Glisse pour regarder autour · ▲▼, molette ou WASD pour marcher · clique un cadre pour l'agrandir · Échap pour sortir</div>
+  <button class="b360" id="b360" type="button">◎ Explorer en 360°</button>
+  <button class="b360" id="x360" type="button">✕ Quitter la vue 360°</button>
+  <div class="walk" id="walk">
+    <button type="button" id="gyro" aria-pressed="false" aria-label="Gyroscope : regarder en bougeant le téléphone">◉</button>
+    <button type="button" data-d="1" aria-label="Avancer">▲</button>
+    <button type="button" data-d="-1" aria-label="Reculer">▼</button>
+  </div>
+  <div class="hint tag" id="hint">Scrolle pour <span class="long">quitter ton bureau et </span>descendre</div>
+</div>
+<div id="sp"></div>
+<main id="static" hidden></main>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Galerie" aria-hidden="true">
+  <div class="lb-stage"><picture id="lbPic"></picture></div>
+  <div class="row">
+    <button id="lbPrev" type="button" aria-label="Image précédente">←</button>
+    <span class="tag" id="lbCount"></span>
+    <button id="lbNext" type="button" aria-label="Image suivante">→</button>
+    <a id="lbLink" class="lb-link" target="_blank" rel="noopener" hidden></a>
+    <button id="lbX" type="button">✕ Fermer</button>
+  </div>
+  <p class="tag lb-cap" id="lbCap"></p>
+</div>
+
+<div class="loader" id="loader" role="progressbar" aria-label="Chargement">
+  <div class="loader-in">
+    <span class="tag accent">La Tour d'Alex</span>
+    <strong class="big">Alex</strong>
+    <div class="loader-track"><div class="loader-bar" id="loaderBar"></div></div>
+    <span class="tag" id="loaderTxt">Chargement…</span>
+  </div>
+</div>
+<noscript><style>.loader,#gl,.hud{display:none}</style><p style="padding:24px">Ce portfolio 3D a besoin de JavaScript. Alexandre Graas · Brand &amp; marketing · ICN Business School.</p></noscript>
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>

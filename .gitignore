@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+# Les sources brutes (exports Canva, photos) restent hors du dépôt si elles sont lourdes :
+# retirer la ligne suivante pour les versionner.
+raw/**/*
+!raw/README.md

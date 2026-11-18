@@ -1,0 +1,25 @@
+{
+  "name": "la-tour-d-alex",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "La Tour d'Alex — portfolio 3D immersif d'Alexandre Graas",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "images": "node scripts/prepare-images.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fontsource-variable/archivo": "5.3.0",
+    "@fontsource/instrument-serif": "5.3.0",
+    "three": "0.187.0"
+  },
+  "devDependencies": {
+    "@types/three": "0.187.0",
+    "sharp": "0.35.5",
+    "typescript": "~5.9.3",
+    "vite": "8.3.8"
+  }
+}
