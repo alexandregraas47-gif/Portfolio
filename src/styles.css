@@ -160,3 +160,55 @@ a { color: inherit }
 @media (prefers-reduced-motion: reduce) { *, *::before { transition: none !important; scroll-behavior: auto !important } }
 
 .debug { position: fixed; left: 8px; bottom: 8px; z-index: 20; font: 11px/1.4 ui-monospace, monospace; color: #0f0; background: rgba(0, 0, 0, .7); padding: 6px 8px; border-radius: 6px; pointer-events: none; white-space: pre }
+
+/* ================= Ambiances (src/looks.ts) ================= */
+
+/* --- Nuit : verre sombre, liserés néon --- */
+[data-look="nuit"] .st:not(.intro):not(.end) .box { background: rgba(5, 6, 26, .62); border-color: rgba(255, 195, 230, .45); box-shadow: 0 0 0 1px rgba(255, 195, 230, .08), 0 0 40px rgba(255, 195, 230, .12) }
+[data-look="nuit"] .st .num { -webkit-text-stroke-color: var(--pink); filter: drop-shadow(0 0 10px rgba(255, 195, 230, .55)) }
+[data-look="nuit"] .st.intro h1, [data-look="nuit"] .st.end h2 { text-shadow: 0 0 30px rgba(138, 148, 255, .45) }
+
+/* --- Galerie : cartels de musée, encre sur blanc --- */
+[data-look="galerie"] body { --hud: var(--ink) }
+[data-look="galerie"] .top, [data-look="galerie"] .hint, [data-look="galerie"] .t360 { color: var(--ink); text-shadow: none }
+[data-look="galerie"] .accent, [data-look="galerie"] .st .tag { color: var(--cobalt) }
+[data-look="galerie"] .bar { background: var(--cobalt) }
+[data-look="galerie"] .dots button::before { border-color: var(--cobalt) }
+[data-look="galerie"] .dots button.on::before { background: var(--cobalt) }
+[data-look="galerie"] .vignette { display: none }
+[data-look="galerie"] .st .box { background: rgba(255, 255, 255, .94); color: var(--ink); border: 0; border-radius: 2px; backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: 0 24px 60px rgba(10, 14, 51, .14) }
+[data-look="galerie"] .st .num { -webkit-text-stroke-color: var(--cobalt) }
+[data-look="galerie"] .st .team { color: var(--cobalt) }
+[data-look="galerie"] .chips li { border-color: var(--ink) }
+[data-look="galerie"] .pill { background: var(--cobalt); color: var(--paper) }
+[data-look="galerie"] .pill:hover { background: var(--ink) }
+[data-look="galerie"] .acts .ext { color: var(--cobalt) }
+[data-look="galerie"] .st.intro .box, [data-look="galerie"] .st.end .box { background: none; box-shadow: none; color: var(--ink); text-shadow: none }
+[data-look="galerie"] .b360, [data-look="galerie"] .walk button { background: var(--ink); color: var(--paper); border-color: var(--ink) }
+[data-look="galerie"] .lift { background: rgba(255, 255, 255, .92); color: var(--ink); border-color: rgba(10, 14, 51, .12) }
+[data-look="galerie"] .lift .arr, [data-look="galerie"] .lift b { color: var(--cobalt) }
+
+/* --- Pop : aplats, contours épais, ombres pleines --- */
+[data-look="pop"] .st .box { background: var(--pink); color: var(--ink); border: 2.5px solid var(--ink); border-radius: 6px; backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: 8px 8px 0 var(--ink) }
+[data-look="pop"] .st .num { -webkit-text-stroke: 2px var(--ink) }
+[data-look="pop"] .st .tag, [data-look="pop"] .st .team { color: var(--cobalt) }
+[data-look="pop"] .chips li { border: 2px solid var(--ink); background: var(--paper) }
+[data-look="pop"] .pill { background: var(--ink); color: var(--pink) }
+[data-look="pop"] .pill:hover { background: var(--cobalt); color: var(--paper) }
+[data-look="pop"] .acts .ext { color: var(--ink) }
+[data-look="pop"] .st.intro .box, [data-look="pop"] .st.end .box { background: none; border: 0; box-shadow: none; color: var(--paper) }
+[data-look="pop"] .st.intro h1, [data-look="pop"] .st.end h2, [data-look="pop"] .st.intro h2 { text-shadow: 6px 6px 0 var(--ink) }
+[data-look="pop"] .st.intro .tag, [data-look="pop"] .st.end .tag { color: var(--paper); text-shadow: 2px 2px 0 var(--ink) }
+[data-look="pop"] .st.end .links { color: var(--paper); text-shadow: 2px 2px 0 var(--ink) }
+[data-look="pop"] .b360, [data-look="pop"] .walk button { background: var(--ink); border: 2px solid var(--ink); color: var(--pink); box-shadow: 4px 4px 0 var(--paper) }
+[data-look="pop"] .vignette { display: none }
+[data-look="pop"] .lift { background: var(--pink); color: var(--ink); border: 2.5px solid var(--ink); box-shadow: 6px 6px 0 var(--ink) }
+[data-look="pop"] .lift .arr, [data-look="pop"] .lift b { color: var(--ink) }
+[data-look="pop"] .top { text-shadow: 1px 1px 0 var(--ink) }
+
+/* Sélecteur d'ambiance (temporaire, le temps de choisir) */
+.lookpick { position: fixed; z-index: 4; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 40px); transform: translateX(-50%); display: flex; gap: 4px; padding: 4px; border-radius: 99px; background: rgba(10, 14, 51, .85); border: 1px solid rgba(255, 195, 230, .4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px) }
+.lookpick button { font: inherit; font-size: .72rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--pink); background: none; border: 0; border-radius: 99px; padding: .5rem .9rem; cursor: pointer; min-height: 36px }
+.lookpick button[aria-pressed="true"] { background: var(--pink); color: var(--ink) }
+.v360 .lookpick { display: none }
+body:has(.lookpick) .lift, body:has(.lookpick) .t360 { top: calc(env(safe-area-inset-top, 0px) + 96px) }

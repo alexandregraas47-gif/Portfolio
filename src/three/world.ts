@@ -4,6 +4,7 @@ import { STEPS } from '../content';
 import type { Step } from '../content';
 import { projectImages, screenImage } from '../images';
 import { EXHIBITS } from './exhibits';
+import { LOOK } from '../looks';
 import { box, canvasTexture, glossy, matte, metal } from './kit';
 import type { ExhibitApi } from './kit';
 import { carpetTexture, framePanel, numTexture, screenPanel, signTexture } from './textures';
@@ -16,8 +17,8 @@ export const OBJ_X = 14; // x de l'objet sur socle
 export const N = STEPS.length;
 export const ROOM = { xMin: 3.2, xMax: 20.4, zMin: -5, zMax: 5 };
 export const PLINTH_R = 1.6;
-/** Réglages d'éclairage (à affiner sur vrais écrans). */
-export const LIGHT = { hemi: 2.2, dir: 1.9, point: 0.9, exposure: 1 };
+/** Réglages d'éclairage : viennent de l'ambiance choisie (src/looks.ts). */
+export const LIGHT = { hemi: LOOK.hemi[2], dir: LOOK.dir, point: LOOK.point, exposure: LOOK.exposure };
 
 /** Élément cliquable dans une salle (cadre ou écran). */
 export interface Clickable {
@@ -46,6 +47,8 @@ export interface World {
   floors: FloorRec[];
   clickables: Clickable[];
   car: THREE.Group;
+  /** Projecteur qui suit l'objet de l'étage courant (null si l'ambiance n'en a pas). */
+  spot: THREE.SpotLight | null;
 }
 
 /** Générateur pseudo-aléatoire déterministe (skyline identique à chaque visite). */
@@ -61,8 +64,8 @@ function makeEnv(renderer: THREE.WebGLRenderer) {
   const geo = new THREE.SphereGeometry(10, 32, 16);
   const pos = geo.attributes.position;
   const cols: number[] = [];
-  const c1 = new THREE.Color(0x2230f5);
-  const c2 = new THREE.Color(0xffc3e6);
+  const c1 = new THREE.Color(LOOK.env[0]);
+  const c2 = new THREE.Color(LOOK.env[1]);
   for (let i = 0; i < pos.count; i++) {
     const c = c1.clone().lerp(c2, (pos.getY(i) / 10 + 1) / 2);
     cols.push(c.r, c.g, c.b);
@@ -97,10 +100,7 @@ function background() {
   c.height = 512;
   const x = c.getContext('2d')!;
   const g = x.createLinearGradient(0, 0, 0, 512);
-  g.addColorStop(0, '#0A0E33');
-  g.addColorStop(0.55, '#2230F5');
-  g.addColorStop(0.85, '#8A7BE8');
-  g.addColorStop(1, '#FFC3E6');
+  LOOK.sky.forEach((c, i, a) => g.addColorStop(i / (a.length - 1), c));
   x.fillStyle = g;
   x.fillRect(0, 0, 8, 512);
   return canvasTexture(c);
@@ -113,9 +113,9 @@ function skyline(scene: THREE.Scene) {
   c.width = 64;
   c.height = 64;
   const x = c.getContext('2d')!;
-  x.fillStyle = '#0d1250';
+  x.fillStyle = LOOK.towerFill;
   x.fillRect(0, 0, 64, 64);
-  const cols = ['#FFC3E6', '#ffe9a8', '#8A94FF'];
+  const cols = LOOK.windows;
   for (let i = 0; i < 8; i++)
     for (let j = 0; j < 8; j++)
       if (rand() < 0.38) {
@@ -145,7 +145,7 @@ function skyline(scene: THREE.Scene) {
 
 export function buildWorld(renderer: THREE.WebGLRenderer): World {
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x2a3a9a, 0.0035);
+  scene.fog = new THREE.FogExp2(LOOK.fog[0], LOOK.fog[1]);
   scene.background = background();
   const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 400);
   scene.add(camera);
@@ -156,7 +156,7 @@ export function buildWorld(renderer: THREE.WebGLRenderer): World {
     /* sans environnement : l'éclairage direct suffit */
   }
   // Intensités ajustées après rendu réel (Three récent : éclairage physique + sortie sRGB).
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x8a94ff, LIGHT.hemi));
+  scene.add(new THREE.HemisphereLight(LOOK.hemi[0], LOOK.hemi[1], LIGHT.hemi));
   const dl = new THREE.DirectionalLight(0xffffff, LIGHT.dir);
   dl.position.set(2, 4, 2);
   camera.add(dl);
@@ -168,21 +168,35 @@ export function buildWorld(renderer: THREE.WebGLRenderer): World {
 
   skyline(scene);
 
+  // Un seul projecteur pour toute la tour : il se place sur l'étage courant (nombre de lumières
+  // constant, donc pas de recompilation de shaders en descendant).
+  let spot: THREE.SpotLight | null = null;
+  if (LOOK.spot > 0) {
+    spot = new THREE.SpotLight(LOOK.spotColor, LOOK.spot, 9, 0.42, 0.55, 1.4);
+    scene.add(spot, spot.target);
+  }
+
   /* ---------- la tour ---------- */
   const floors: FloorRec[] = [];
   const clickables: Clickable[] = [];
   const carpet = carpetTexture();
-  const plinthMat = glossy(0xf1edfa, 0.25);
-  const wallWhite = matte(0xf4f1fa, 0.2);
-  const ceilMat = matte(0xffffff, 0.1);
-  const doorMat = metal(0xc9cee6);
-  const frameMat = metal(0x0a0e33);
+  const plinthMat = glossy(LOOK.plinth.color, LOOK.plinth.rough, { metalness: LOOK.plinth.metal });
+  const wallWhite = matte(LOOK.wall, 0.2);
+  const ceilMat = matte(LOOK.ceiling, 0.1);
+  const doorMat = metal(LOOK.name === 'nuit' ? 0x3a4080 : 0xc9cee6);
+  const frameMat = metal(LOOK.frame);
   const lintel = matte(0x10132e, 0.1);
   const potMat = matte(0x1c1f45, 0.2);
   const leafMat = matte(0x2f8f6a, 0.2);
-  const lightMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-  const pinkGlow = new THREE.MeshBasicMaterial({ color: 0xffc3e6 });
-  const carpetMat = new THREE.MeshStandardMaterial({ map: carpet, roughness: 0.95, envMapIntensity: 0.1 });
+  const lightMat = new THREE.MeshBasicMaterial({ color: LOOK.lightColor });
+  const pinkGlow = new THREE.MeshBasicMaterial({ color: LOOK.halo });
+  const trimMat = LOOK.trim != null ? new THREE.MeshBasicMaterial({ color: LOOK.trim }) : null;
+  const carpetMat = LOOK.floor.carpet
+    ? new THREE.MeshStandardMaterial({ map: carpet, roughness: 0.95, envMapIntensity: 0.1 })
+    : new THREE.MeshPhysicalMaterial({
+        color: LOOK.floor.color, roughness: LOOK.floor.rough, metalness: LOOK.floor.metal,
+        clearcoat: LOOK.floor.rough < 0.3 ? 1 : 0, clearcoatRoughness: 0.08, envMapIntensity: 1,
+      });
   const glassMat = new THREE.MeshBasicMaterial({ color: 0xbfd0ff, transparent: true, opacity: 0.07, side: THREE.DoubleSide, depthWrite: false });
   const glassGeo = new THREE.PlaneGeometry(12, 4.4);
   const potGeo = new THREE.CylinderGeometry(0.34, 0.28, 0.55, 24);
@@ -202,7 +216,8 @@ export function buildWorld(renderer: THREE.WebGLRenderer): World {
     box(20.4, 0.3, 12.4, ceilMat, 11.95, 4.55, 0, fg);
     // murs : accent (nord), blanc (sud), mur palier avec ouverture
     const accent = s.bg;
-    box(20.4, 4.4, 0.2, matte(accent, 0.2), 11.95, 2.2, -6.1, fg);
+    const north = LOOK.accentWall === 'tint' ? accent : LOOK.accentWall;
+    box(20.4, 4.4, 0.2, matte(north, 0.2), 11.95, 2.2, -6.1, fg);
     box(20.4, 4.4, 0.2, wallWhite, 11.95, 2.2, 6.1, fg);
     box(0.3, 4.4, 5, wallWhite, 1.7, 2.2, -3.5, fg);
     box(0.3, 4.4, 5, wallWhite, 1.7, 2.2, 3.5, fg);
@@ -216,8 +231,19 @@ export function buildWorld(renderer: THREE.WebGLRenderer): World {
     for (let z = -6; z <= 6; z += 3) box(0.14, 4.4, 0.14, doorMat, 22.1, 2.2, z, fg);
     box(0.2, 0.14, 12.2, doorMat, 22.1, 0.07, 0, fg);
     box(0.2, 0.14, 12.2, doorMat, 22.1, 4.4, 0, fg);
-    // dalles lumineuses
-    for (let lx = 0; lx < 4; lx++) for (let lz = -1; lz <= 1; lz++) box(2.2, 0.04, 1.3, lightMat, 6 + lx * 5.2, 4.38, lz * 3.6, fg);
+    // éclairage du plafond
+    if (LOOK.ceilingLights === 'neon') {
+      for (const lz of [-3.6, 0, 3.6]) box(17.5, 0.04, 0.07, lightMat, 12.6, 4.37, lz, fg);
+    } else {
+      for (let lx = 0; lx < 4; lx++) for (let lz = -1; lz <= 1; lz++) box(2.2, 0.04, 1.3, lightMat, 6 + lx * 5.2, 4.38, lz * 3.6, fg);
+    }
+    // néons au pied des murs
+    if (trimMat) {
+      box(20.2, 0.05, 0.05, trimMat, 11.95, 0.04, -5.97, fg);
+      box(20.2, 0.05, 0.05, trimMat, 11.95, 0.04, 5.97, fg);
+      box(20.2, 0.05, 0.05, trimMat, 11.95, 4.33, -5.97, fg);
+      box(20.2, 0.05, 0.05, trimMat, 11.95, 4.33, 5.97, fg);
+    }
     // enseigne (nord)
     const sign = new THREE.Mesh(
       new THREE.PlaneGeometry(11, 2.57),
@@ -258,7 +284,7 @@ export function buildWorld(renderer: THREE.WebGLRenderer): World {
     }
 
     // plantes
-    for (const [px, pz] of [[3.2, -5], [3.2, 5], [20.5, -5], [20.5, 5]]) {
+    if (LOOK.plants) for (const [px, pz] of [[3.2, -5], [3.2, 5], [20.5, -5], [20.5, 5]]) {
       const pot = new THREE.Mesh(potGeo, potMat);
       pot.position.set(px, 0.28, pz);
       fg.add(pot);
@@ -321,13 +347,13 @@ export function buildWorld(renderer: THREE.WebGLRenderer): World {
   });
 
   /* gaine + cabine */
-  const shaftMat = matte(0x0c0f2a, 0.05);
+  const shaftMat = matte(LOOK.shaft, 0.05);
   box(0.2, H * N + 4, 3.6, shaftMat, -1.7, (H * N) / 2 - 2, 0, scene);
   box(3.6, H * N + 4, 0.2, shaftMat, 0, (H * N) / 2 - 2, -1.8, scene);
   box(3.6, H * N + 4, 0.2, shaftMat, 0, (H * N) / 2 - 2, 1.8, scene);
   const car = new THREE.Group();
   scene.add(car);
-  const carWall = metal(0xb9bedb);
+  const carWall = metal(LOOK.carWall);
   box(3, 0.1, 3.2, matte(0x1c1f45, 0.2), 0, -0.05, 0, car);
   box(3, 0.1, 3.2, carWall, 0, 3.05, 0, car);
   box(1.6, 0.04, 1.6, lightMat, 0, 2.98, 0, car);
@@ -340,5 +366,5 @@ export function buildWorld(renderer: THREE.WebGLRenderer): World {
   panelDots.rotation.y = Math.PI / 2;
   car.add(panelDots);
 
-  return { scene, camera, floors, clickables, car };
+  return { scene, camera, floors, clickables, car, spot };
 }

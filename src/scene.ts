@@ -41,7 +41,7 @@ export async function startScene(ctx: Ctx) {
   const quality = new Quality(renderer);
 
   const world = buildWorld(renderer);
-  const { scene, camera, floors, car } = world;
+  const { scene, camera, floors, car, spot } = world;
   ctx.progress(0.3, 'Allumage des lumières…');
 
   /* ---------- taille ---------- */
@@ -223,6 +223,15 @@ export async function startScene(ctx: Ctx) {
       camera.updateProjectionMatrix();
     }
     car.position.y = carY;
+    // projecteur : au-dessus de l'objet de l'étage le plus proche
+    if (spot) {
+      const sk = Math.round(clamp(u, 0, N - 1));
+      const fy = (N - 1 - sk) * H;
+      const oz = floors[sk].oz;
+      spot.position.set(OBJ_X - 1.2, fy + 4.3, oz);
+      spot.target.position.set(OBJ_X, fy + 1.4, oz);
+      spot.target.updateMatrixWorld();
+    }
 
     // étages : visibilité (±1.7 niveau), portes, animations, chargement des images
     const camF = camera.position.y / H;

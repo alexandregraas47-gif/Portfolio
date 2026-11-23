@@ -1,5 +1,6 @@
 import '@fontsource-variable/archivo/wdth.css';
 import '@fontsource/instrument-serif/latin-400-italic.css';
+import './looks';
 import './styles.css';
 import { STEPS } from './content';
 import { projectImages, screenImage } from './images';
